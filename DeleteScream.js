@@ -19,9 +19,9 @@ import DeleteOutline from '@material-ui/icons/Delete';
 import PropTypes from 'prop-types';
 
 import { connect } from 'react-redux';
-import { deleteScream } from '../redux/actions/dataAction';
-import { likeScream ,unlikeScream } from '../redux/actions/dataAction';
-import MyButton from '../util/MyButton';
+import { deleteScream } from '../../redux/actions/dataAction';
+import { likeScream ,unlikeScream } from '../../redux/actions/dataAction';
+import MyButton from '../../util/MyButton';
 
 const styles = {
     deleteButton : {

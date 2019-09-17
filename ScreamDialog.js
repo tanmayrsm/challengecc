@@ -2,7 +2,9 @@ import React, { Component, Fragment } from 'react'
 import PropTypes from 'prop-types';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { Link } from 'react-router-dom';
-import MyButton from '../util/MyButton';
+import MyButton from '../../util/MyButton';
+import LikeButton from './LikeButton';
+import CommentForm from './CommentForm';
 
 import Tooltip from '@material-ui/core/Tooltip';
 import Button from '@material-ui/core/Button';
@@ -22,14 +24,20 @@ import dayjs from 'dayjs';
 import UnfoldMore from '@material-ui/icons/UnfoldMore';
 import ChatIcon from '@material-ui/icons/Chat';
 
+import Comment from './Comment';
 
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 
 import { connect } from 'react-redux';
-import { getScream ,clearErrors} from '../redux/actions/dataAction';
+import { getScream ,clearErrors} from '../../redux/actions/dataAction';
 
 const styles = {
+    visibleSeparator : {
+      width : '100%',
+      borderBottom : '1px solid rgba(0,0,0,0.1)',
+      marginBottom : 20
+    },
     invisibleSeparator : {
         border : 'none',
         margin :4
@@ -60,14 +68,34 @@ const styles = {
 
 class ScreamDialog extends Component {
     state = {
-        open :false
+        open :false,
+        oldPath : '',
+        newPath  :''
     }
+    componentDidMount() {
+      if (this.props.openDialog) {
+        this.handleOpen();
+      }
+    }
+  
     handleOpen = () => {
-        this.setState({ open : true });
-        this.props.getScream(this.props.screamId);
+      let oldPath = window.location.pathname;
+
+      const { userHandle, screamId } = this.props;
+      const newPath = `/users/${userHandle}/screams/${screamId}`;
+  
+      if (oldPath === newPath) oldPath = `/users/${userHandle}`;
+  
+      window.history.pushState(null, null, newPath);
+  
+      this.setState({ open: true, oldPath, newPath });
+      this.props.getScream(this.props.screamId);
+
     }
     handleClose = () => {
-        this.setState({ open :false });
+      window.history.pushState(null, null, this.state.oldPath); //where u go ,where u r
+      this.setState({ open: false });
+      this.props.clearErrors();
     }
     render() {
         const {
@@ -109,16 +137,16 @@ class ScreamDialog extends Component {
                     </Typography>
                  <hr className={classes.invisibleSeparator} />
                     <Typography variant="body1">{body}</Typography>
-                 {/*   <LikeButton screamId={screamId} />
+                   <LikeButton screamId={screamId} />
                      <span>{likeCount} likes</span> 
                     <MyButton tip="comments">
                     <ChatIcon color="primary" />
                     </MyButton>
-                <span>{commentCount} comments</span> */}
+                <span>{commentCount} comments</span>
               </Grid>
-              {/* <hr className={classes.visibleSeparator} />
+              <hr className={classes.visibleSeparator} />
               <CommentForm screamId={screamId} />
-              <Comments comments={comments} /> */}
+              <Comment comments={comments} />
             </Grid>
           );
         return (
@@ -156,7 +184,8 @@ ScreamDialog.propTypes = {
     screamId : PropTypes.string.isRequired,
     userHandle : PropTypes.string.isRequired,
     scream : PropTypes.object.isRequired,
-    UI : PropTypes.object.isRequired
+    UI : PropTypes.object.isRequired,
+    clearErrors : PropTypes.func.isRequired
 }
 
 const mapStateToProps = (state) => ({
